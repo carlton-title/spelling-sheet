@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spelling Sheet for M4</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4ff; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 30px 16px; }
+    .sheet { background: #fff; border-radius: 18px; box-shadow: 0 4px 24px rgba(80,80,180,0.13); max-width: 520px; width: 100%; padding: 36px 36px 40px; border: 2.5px solid #c3cffe; }
+    .banner { background: linear-gradient(90deg, #6c63ff 0%, #a78bfa 100%); border-radius: 12px; color: #fff; text-align: center; padding: 14px 16px 10px; margin-bottom: 22px; }
+    .banner h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: 1px; }
+    .banner .tagline { font-size: 0.88rem; margin-top: 4px; opacity: 0.9; font-style: italic; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin-bottom: 26px; }
+    .info-grid .full-width { grid-column: 1 / -1; }
+    .field-label { font-size: 0.75rem; font-weight: 700; color: #6c63ff; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .field-input, .field-select { width: 100%; border: none; border-bottom: 2px solid #c3cffe; background: transparent; font-size: 1rem; padding: 4px 2px; color: #222; outline: none; transition: border-color 0.2s; font-family: inherit; }
+    .field-select { cursor: pointer; -webkit-appearance: none; }
+    .field-input:focus, .field-select:focus { border-bottom-color: #6c63ff; }
+    .field-input::placeholder { color: #bbb; font-style: italic; font-size: 0.88rem; }
+    .divider { border: none; border-top: 2px dashed #e0e0f7; margin: 0 0 22px; }
+    .answers-title { font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+    .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
+    .answer-row { display: flex; align-items: center; gap: 8px; }
+    .answer-num { font-size: 1rem; font-weight: 700; color: #6c63ff; min-width: 22px; }
+    .answer-input { flex: 1; border: none; border-bottom: 2px solid #c3cffe; background: transparent; font-size: 1rem; padding: 3px 2px; color: #222; outline: none; transition: border-color 0.2s; font-family: inherit; }
+    .answer-input:focus { border-bottom-color: #6c63ff; }
+    .answer-input::placeholder { color: #ccc; }
+    .submit-btn { display: block; width: 100%; margin-top: 28px; padding: 13px; background: linear-gradient(90deg, #6c63ff 0%, #a78bfa 100%); color: #fff; font-size: 1.05rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .msg { margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 0.92rem; text-align: center; display: none; }
+    .msg.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    .msg.error { background: #fdecea; color: #c62828; display: block; }
+    .footer { margin-top: 22px; text-align: center; font-size: 0.78rem; color: #bbb; }
+    @media print { body { background: #fff; padding: 0; } .sheet { box-shadow: none; border: none; border-radius: 0; max-width: 100%; } .submit-btn, .msg { display: none !important; } }
+  </style>
+</head>
+<body>
+<div class="sheet">
+  <div class="banner">
+    <h1>&#9999;&#65039; Spelling Sheet</h1>
+    <div class="tagline">You are amazing!</div>
+  </div>
+  <form id="spellingForm" novalidate>
+    <div class="info-grid">
+      <div class="full-width">
+        <div class="field-label">English Nickname</div>
+        <input class="field-input" type="text" id="nickname" placeholder="Enter your English nickname" required />
+      </div>
+      <div>
+        <div class="field-label">Student ID</div>
+        <input class="field-input" type="text" id="studentId" placeholder="Student ID" required />
+      </div>
+      <div>
+        <div class="field-label">Date</div>
+        <input class="field-input" type="date" id="date" required />
+      </div>
+      <div class="full-width">
+        <div class="field-label">Grade Level / Section</div>
+        <select class="field-select" id="section" required>
+          <option value="">-- Select your section --</option>
+          <option value="M4/10">M4/10</option>
+          <option value="M4/11">M4/11</option>
+          <option value="M4/12">M4/12</option>
+          <option value="M4/13">M4/13</option>
+        </select>
+      </div>
+    </div>
+    <hr class="divider" />
+    <div class="answers-title">Spelling Answers</div>
+    <div class="answers-grid">
+      <div class="answer-row"><span class="answer-num">1.</span><input class="answer-input" type="text" id="a1" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">6.</span><input class="answer-input" type="text" id="a6" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">2.</span><input class="answer-input" type="text" id="a2" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">7.</span><input class="answer-input" type="text" id="a7" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">3.</span><input class="answer-input" type="text" id="a3" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">8.</span><input class="answer-input" type="text" id="a8" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">4.</span><input class="answer-input" type="text" id="a4" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">9.</span><input class="answer-input" type="text" id="a9" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">5.</span><input class="answer-input" type="text" id="a5" placeholder="Answer" /></div>
+      <div class="answer-row"><span class="answer-num">10.</span><input class="answer-input" type="text" id="a10" placeholder="Answer" /></div>
+    </div>
+    <button type="submit" class="submit-btn" id="submitBtn">Submit Answers</button>
+    <div class="msg" id="statusMsg"></div>
+  </form>
+  <div class="footer">M4 Spelling Sheet | Your answers will be sent to your teacher</div>
+</div>
+<script>
+  const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+  document.getElementById("spellingForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const nickname = document.getElementById("nickname").value.trim();
+    const studentId = document.getElementById("studentId").value.trim();
+    const date = document.getElementById("date").value;
+    const section = document.getElementById("section").value;
+    if (!nickname || !studentId || !date || !section) {
+      showMsg("Please fill in all required fields.", "error"); return;
+    }
+    const answers = [];
+    for (let i = 1; i <= 10; i++) answers.push(document.getElementById("a" + i).value.trim());
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true; btn.textContent = "Submitting...";
+    try {
+      await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nickname, studentId, date, section, answers }) });
+      showMsg("Submitted! Your answers have been sent to your teacher.", "success");
+      btn.textContent = "Submitted";
+    } catch (err) {
+      showMsg("Could not submit. Check your internet connection.", "error");
+      btn.disabled = false; btn.textContent = "Submit Answers";
+    }
+  });
+  function showMsg(text, type) { const el = document.getElementById("statusMsg"); el.textContent = text; el.className = "msg " + type; }
+</script>
+</body>
+</html>
