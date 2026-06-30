@@ -36,7 +36,7 @@
     .score-label { font-size: 1rem; color: #555; margin-top: 6px; }
     .answer-key { display: none; margin-top: 20px; }
     .answer-key h3 { font-size: 0.8rem; font-weight: 700; color: #6c63ff; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
-    .key-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+    .key-grid { display: flex; gap: 16px; }
     .key-row { display: flex; align-items: baseline; gap: 6px; padding: 6px 10px; border-radius: 7px; font-size: 0.87rem; }
     .key-row.correct { background: #e8f5e9; }
     .key-row.incorrect { background: #fdecea; }
@@ -48,7 +48,7 @@
     .msg { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; text-align: center; }
     .msg.error { background: #fdecea; color: #c62828; }
     .footer { margin-top: 22px; text-align: center; font-size: 0.78rem; color: #bbb; }
-    @media (max-width: 460px) { .sheet { padding: 24px 18px 28px; } .answers-grid { grid-template-columns: 1fr; } .key-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 460px) { .sheet { padding: 24px 18px 28px; } .answers-grid { grid-template-columns: 1fr; } .key-grid { flex-direction: column; } }
   </style>
 </head>
 <body>
@@ -122,7 +122,9 @@
     "M4/13": ["Ancestor","Cousin","Matrimony","Relative","Daughter-In-Law","Genealogy","Prodigy","Inheritance","Nephew","Family"]
   };
   var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTOqqLuCZHQIjWsFE68wHXP3KutCdXdxF604htjhsbRJskTupJs8zEMkMCBXRrT8vV/exec";
+
   document.getElementById("date").valueAsDate = new Date();
+
   document.getElementById("spellingForm").addEventListener("submit", function(e) {
     e.preventDefault();
     var nickname  = document.getElementById("nickname").value.trim();
@@ -160,26 +162,44 @@
       var icon = document.getElementById("c" + (j + 1));
       inp.disabled       = true;
       icon.style.display = "inline";
-      icon.textContent   = results[j].isCorrect ? "OK" : "X";
+      icon.textContent   = results[j].isCorrect ? "✅" : "❌";
     }
-    var emojis = ["Keep practicing!","Keep practicing!","Keep practicing!","Keep practicing!","Keep practicing!","Good effort!","Good effort!","Good effort!","Great job!","Great job!","Perfect!"];
+    var emojis = [
+      "📚 Keep practicing!","📚 Keep practicing!","📚 Keep practicing!",
+      "📚 Keep practicing!","📚 Keep practicing!",
+      "👍 Good effort!","👍 Good effort!","👍 Good effort!",
+      "🎉 Great job!","🎉 Great job!","🌟 Perfect!"
+    ];
     document.getElementById("scoreNum").textContent   = score + " / 10";
     document.getElementById("scoreLabel").textContent = emojis[score];
     document.getElementById("scoreCard").style.display = "block";
     var keyGrid = document.getElementById("keyGrid");
     keyGrid.innerHTML = "";
+    var leftCol  = document.createElement("div");
+    var rightCol = document.createElement("div");
+    leftCol.style.cssText  = "flex:1;display:flex;flex-direction:column;gap:6px";
+    rightCol.style.cssText = "flex:1;display:flex;flex-direction:column;gap:6px";
     for (var k = 0; k < results.length; k++) {
       var r   = results[k];
       var div = document.createElement("div");
       div.className = "key-row " + (r.isCorrect ? "correct" : "incorrect");
-      var yours = (!r.isCorrect && answers[k]) ? '<span class="key-yours">You wrote: ' + answers[k] + '</span>' : "";
-      div.innerHTML = '<span class="key-num">' + (k + 1) + '.</span><span><span class="key-word">' + r.correct + '</span>' + yours + '</span>';
-      keyGrid.appendChild(div);
+      var yours = (!r.isCorrect && answers[k])
+        ? '<span class="key-yours">You wrote: ' + answers[k] + '</span>' : "";
+      div.innerHTML = '<span class="key-num">' + (k + 1) + '.</span>'
+        + '<span><span class="key-word">' + r.correct + '</span>' + yours + '</span>';
+      if (k < 5) { leftCol.appendChild(div); } else { rightCol.appendChild(div); }
     }
+    keyGrid.appendChild(leftCol);
+    keyGrid.appendChild(rightCol);
     document.getElementById("answerKeySection").style.display = "block";
-    var params = "action=saveScore&studentId=" + encodeURIComponent(studentId) + "&nickname=" + encodeURIComponent(nickname) + "&section=" + encodeURIComponent(section) + "&date=" + encodeURIComponent(date) + "&score=" + encodeURIComponent(String(score));
+    var params = "action=saveScore"
+      + "&studentId=" + encodeURIComponent(studentId)
+      + "&nickname="  + encodeURIComponent(nickname)
+      + "&section="   + encodeURIComponent(section)
+      + "&date="      + encodeURIComponent(date)
+      + "&score="     + encodeURIComponent(String(score));
     new Image().src = SCRIPT_URL + "?" + params;
   });
 </script>
 </body>
-        </html>
+                                                                     </html>
