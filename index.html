@@ -7,7 +7,7 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4ff; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 30px 16px; }
-    .sheet { background: #fff; border-radius: 18px; box-shadow: 0 4px 24px rgba(80,80,180,0.13); max-width: 520px; width: 100%; padding: 36px 36px 40px; border: 2.5px solid #c3cffe; }
+    .sheet { background: #fff; border-radius: 18px; box-shadow: 0 4px 24px rgba(80,80,180,0.13); max-width: 540px; width: 100%; padding: 36px 36px 40px; border: 2.5px solid #c3cffe; }
     .banner { background: linear-gradient(90deg, #6c63ff 0%, #a78bfa 100%); border-radius: 12px; color: #fff; text-align: center; padding: 14px 16px 10px; margin-bottom: 22px; }
     .banner h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: 1px; }
     .banner .tagline { font-size: 0.88rem; margin-top: 4px; opacity: 0.9; font-style: italic; }
@@ -22,23 +22,39 @@
     .answers-title { font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
     .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
     .answer-row { display: flex; align-items: center; gap: 8px; }
-    .answer-num { font-size: 1rem; font-weight: 700; color: #6c63ff; min-width: 22px; }
+    .answer-num { font-size: 1rem; font-weight: 700; color: #6c63ff; min-width: 24px; }
     .answer-input { flex: 1; border: none; border-bottom: 2px solid #c3cffe; background: transparent; font-size: 1rem; padding: 3px 2px; color: #222; outline: none; transition: border-color 0.2s; font-family: inherit; }
     .answer-input:focus { border-bottom-color: #6c63ff; }
     .answer-input::placeholder { color: #ccc; }
-    .submit-btn { display: block; width: 100%; margin-top: 28px; padding: 13px; background: linear-gradient(90deg, #6c63ff 0%, #a78bfa 100%); color: #fff; font-size: 1.05rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; }
-    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .msg { margin-top: 16px; padding: 12px 16px; border-radius: 8px; font-size: 0.92rem; text-align: center; display: none; }
-    .msg.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    .answer-input:disabled { color: #444; background: transparent; }
+    .check-icon { font-size: 1.05rem; min-width: 20px; display: none; }
+    .submit-btn { display: block; width: 100%; margin-top: 28px; padding: 13px; background: linear-gradient(90deg, #6c63ff 0%, #a78bfa 100%); color: #fff; font-size: 1.05rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; letter-spacing: 0.5px; transition: opacity 0.2s, transform 0.1s; }
+    .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .score-card { display: none; margin-top: 22px; padding: 20px; border-radius: 14px; background: linear-gradient(135deg, #ede9fe 0%, #e8f5e9 100%); border: 2px solid #c3cffe; text-align: center; }
+    .score-num { font-size: 2.6rem; font-weight: 800; color: #6c63ff; line-height: 1; }
+    .score-label { font-size: 1rem; color: #555; margin-top: 6px; }
+    .answer-key { display: none; margin-top: 20px; }
+    .answer-key h3 { font-size: 0.8rem; font-weight: 700; color: #6c63ff; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+    .key-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+    .key-row { display: flex; align-items: baseline; gap: 6px; padding: 6px 10px; border-radius: 7px; font-size: 0.87rem; }
+    .key-row.correct { background: #e8f5e9; }
+    .key-row.incorrect { background: #fdecea; }
+    .key-num { font-weight: 700; color: #6c63ff; min-width: 18px; }
+    .key-word { font-weight: 700; }
+    .key-row.correct .key-word { color: #2e7d32; }
+    .key-row.incorrect .key-word { color: #c62828; }
+    .key-yours { font-size: 0.76rem; color: #999; display: block; }
+    .msg { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; text-align: center; }
     .msg.error { background: #fdecea; color: #c62828; display: block; }
     .footer { margin-top: 22px; text-align: center; font-size: 0.78rem; color: #bbb; }
-    @media print { body { background: #fff; padding: 0; } .sheet { box-shadow: none; border: none; border-radius: 0; max-width: 100%; } .submit-btn, .msg { display: none !important; } }
+    @media (max-width: 460px) { .sheet { padding: 24px 18px 28px; } .answers-grid { grid-template-columns: 1fr; } .key-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
 <div class="sheet">
   <div class="banner">
-    <h1>&#9999;&#65039; Spelling Sheet</h1>
+    <h1>✏️ Spelling Sheet</h1>
     <div class="tagline">You are amazing!</div>
   </div>
   <form id="spellingForm" novalidate>
@@ -69,47 +85,93 @@
     <hr class="divider" />
     <div class="answers-title">Spelling Answers</div>
     <div class="answers-grid">
-      <div class="answer-row"><span class="answer-num">1.</span><input class="answer-input" type="text" id="a1" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">6.</span><input class="answer-input" type="text" id="a6" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">2.</span><input class="answer-input" type="text" id="a2" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">7.</span><input class="answer-input" type="text" id="a7" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">3.</span><input class="answer-input" type="text" id="a3" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">8.</span><input class="answer-input" type="text" id="a8" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">4.</span><input class="answer-input" type="text" id="a4" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">9.</span><input class="answer-input" type="text" id="a9" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">5.</span><input class="answer-input" type="text" id="a5" placeholder="Answer" /></div>
-      <div class="answer-row"><span class="answer-num">10.</span><input class="answer-input" type="text" id="a10" placeholder="Answer" /></div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="answer-row"><span class="answer-num">1.</span><input class="answer-input" type="text" id="a1" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c1"></span></div>
+        <div class="answer-row"><span class="answer-num">2.</span><input class="answer-input" type="text" id="a2" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c2"></span></div>
+        <div class="answer-row"><span class="answer-num">3.</span><input class="answer-input" type="text" id="a3" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c3"></span></div>
+        <div class="answer-row"><span class="answer-num">4.</span><input class="answer-input" type="text" id="a4" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c4"></span></div>
+        <div class="answer-row"><span class="answer-num">5.</span><input class="answer-input" type="text" id="a5" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c5"></span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="answer-row"><span class="answer-num">6.</span><input class="answer-input" type="text" id="a6" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c6"></span></div>
+        <div class="answer-row"><span class="answer-num">7.</span><input class="answer-input" type="text" id="a7" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c7"></span></div>
+        <div class="answer-row"><span class="answer-num">8.</span><input class="answer-input" type="text" id="a8" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c8"></span></div>
+        <div class="answer-row"><span class="answer-num">9.</span><input class="answer-input" type="text" id="a9" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c9"></span></div>
+        <div class="answer-row"><span class="answer-num">10.</span><input class="answer-input" type="text" id="a10" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c10"></span></div>
+      </div>
     </div>
-    <button type="submit" class="submit-btn" id="submitBtn">Submit Answers</button>
-    <div class="msg" id="statusMsg"></div>
+    <button type="submit" class="submit-btn" id="submitBtn">Submit Answers ✓</button>
+    <div class="msg error" id="errorMsg" style="display:none"></div>
   </form>
-  <div class="footer">M4 Spelling Sheet | Your answers will be sent to your teacher</div>
+  <div class="score-card" id="scoreCard">
+    <div class="score-num" id="scoreNum"></div>
+    <div class="score-label" id="scoreLabel"></div>
+  </div>
+  <div class="answer-key" id="answerKeySection">
+    <h3>Answer Key</h3>
+    <div class="key-grid" id="keyGrid"></div>
+  </div>
+  <div class="footer">M4 Spelling Sheet &nbsp;|&nbsp; Your score is sent to your teacher</div>
 </div>
 <script>
+  const ANSWER_KEYS = {
+    "M4/10": ["Congenial","Friendship","Camaraderie","Teammate","Buddy","Associate","Companion","Acquaintance","Peer","Colleague"],
+    "M4/11": ["Platform","Model","Database","Encryption","Transfer","Code","Algorithm","Cybersecurity","Software","Layer"],
+    "M4/12": ["Camouflage","Habitat","Ecosystem","Prey","Herbivore","Adaptation","Offspring","Predator","Carnivore","Species"],
+    "M4/13": ["Ancestor","Cousin","Matrimony","Relative","Daughter-In-Law","Genealogy","Prodigy","Inheritance","Nephew","Family"]
+  };
   const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+  document.getElementById("date").valueAsDate = new Date();
   document.getElementById("spellingForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    const nickname = document.getElementById("nickname").value.trim();
+    const nickname  = document.getElementById("nickname").value.trim();
     const studentId = document.getElementById("studentId").value.trim();
-    const date = document.getElementById("date").value;
-    const section = document.getElementById("section").value;
+    const date      = document.getElementById("date").value;
+    const section   = document.getElementById("section").value;
+    const errEl     = document.getElementById("errorMsg");
+    errEl.style.display = "none";
     if (!nickname || !studentId || !date || !section) {
-      showMsg("Please fill in all required fields.", "error"); return;
+      errEl.textContent = "Please fill in all fields: Nickname, Student ID, Date, and Section.";
+      errEl.style.display = "block";
+      return;
     }
     const answers = [];
     for (let i = 1; i <= 10; i++) answers.push(document.getElementById("a" + i).value.trim());
+    const key = ANSWER_KEYS[section] || [];
+    let score = 0;
+    const results = answers.map((ans, i) => {
+      const isCorrect = ans.toLowerCase() === (key[i] || "").toLowerCase();
+      if (isCorrect) score++;
+      return { isCorrect, correct: key[i] || "" };
+    });
     const btn = document.getElementById("submitBtn");
-    btn.disabled = true; btn.textContent = "Submitting...";
-    try {
-      await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nickname, studentId, date, section, answers }) });
-      showMsg("Submitted! Your answers have been sent to your teacher.", "success");
-      btn.textContent = "Submitted";
-    } catch (err) {
-      showMsg("Could not submit. Check your internet connection.", "error");
-      btn.disabled = false; btn.textContent = "Submit Answers";
+    btn.disabled = true;
+    btn.textContent = "Submitted ✓";
+    for (let i = 0; i < 10; i++) {
+      const inp = document.getElementById("a" + (i + 1));
+      const icon = document.getElementById("c" + (i + 1));
+      inp.disabled = true;
+      icon.style.display = "inline";
+      icon.textContent = results[i].isCorrect ? "✅" : "❌";
+    }
+    const emojis = ["📖 Keep practicing!","📖 Keep practicing!","📖 Keep practicing!","📖 Keep practicing!","📖 Keep practicing!","👍 Good effort!","👍 Good effort!","👍 Good effort!","🎉 Great job!","🎉 Great job!","🌟 Perfect!"];
+    document.getElementById("scoreNum").textContent = score + " / 10";
+    document.getElementById("scoreLabel").textContent = emojis[score];
+    document.getElementById("scoreCard").style.display = "block";
+    const keyGrid = document.getElementById("keyGrid");
+    keyGrid.innerHTML = "";
+    results.forEach((r, i) => {
+      const div = document.createElement("div");
+      div.className = "key-row " + (r.isCorrect ? "correct" : "incorrect");
+      const yours = (!r.isCorrect && answers[i]) ? `<span class="key-yours">You wrote: ${answers[i]}</span>` : "";
+      div.innerHTML = `<span class="key-num">${i + 1}.</span><span><span class="key-word">${r.correct}</span>${yours}</span>`;
+      keyGrid.appendChild(div);
+    });
+    document.getElementById("answerKeySection").style.display = "block";
+    if (SCRIPT_URL !== "PASTE_YOUR_APPS_SCRIPT_URL_HERE") {
+      fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nickname, studentId, date, section, answers }) }).catch(() => {});
     }
   });
-  function showMsg(text, type) { const el = document.getElementById("statusMsg"); el.textContent = text; el.className = "msg " + type; }
 </script>
 </body>
 </html>
