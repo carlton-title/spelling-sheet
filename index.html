@@ -46,7 +46,7 @@
     .key-row.incorrect .key-word { color: #c62828; }
     .key-yours { font-size: 0.76rem; color: #999; display: block; }
     .msg { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; text-align: center; }
-    .msg.error { background: #fdecea; color: #c62828; display: block; }
+    .msg.error { background: #fdecea; color: #c62828; }
     .footer { margin-top: 22px; text-align: center; font-size: 0.78rem; color: #bbb; }
     @media (max-width: 460px) { .sheet { padding: 24px 18px 28px; } .answers-grid { grid-template-columns: 1fr; } .key-grid { grid-template-columns: 1fr; } }
   </style>
@@ -54,7 +54,7 @@
 <body>
 <div class="sheet">
   <div class="banner">
-    <h1>✏️ Spelling Sheet</h1>
+    <h1>&#x270F;&#xFE0F; Spelling Sheet</h1>
     <div class="tagline">You are amazing!</div>
   </div>
   <form id="spellingForm" novalidate>
@@ -100,7 +100,7 @@
         <div class="answer-row"><span class="answer-num">10.</span><input class="answer-input" type="text" id="a10" autocomplete="off" placeholder="Answer"/><span class="check-icon" id="c10"></span></div>
       </div>
     </div>
-    <button type="submit" class="submit-btn" id="submitBtn">Submit Answers ✓</button>
+    <button type="submit" class="submit-btn" id="submitBtn">Submit Answers &#x2713;</button>
     <div class="msg error" id="errorMsg" style="display:none"></div>
   </form>
   <div class="score-card" id="scoreCard">
@@ -113,70 +113,73 @@
   </div>
   <div class="footer">M4 Spelling Sheet &nbsp;|&nbsp; Your score is sent to your teacher</div>
 </div>
+
 <script>
-  const ANSWER_KEYS = {
+  var ANSWER_KEYS = {
     "M4/10": ["Congenial","Friendship","Camaraderie","Teammate","Buddy","Associate","Companion","Acquaintance","Peer","Colleague"],
     "M4/11": ["Platform","Model","Database","Encryption","Transfer","Code","Algorithm","Cybersecurity","Software","Layer"],
     "M4/12": ["Camouflage","Habitat","Ecosystem","Prey","Herbivore","Adaptation","Offspring","Predator","Carnivore","Species"],
     "M4/13": ["Ancestor","Cousin","Matrimony","Relative","Daughter-In-Law","Genealogy","Prodigy","Inheritance","Nephew","Family"]
   };
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTOqqLuCZHQIjWsFE68wHXP3KutCdXdxF604htjhsbRJskTupJs8zEMkMCBXRrT8vV/exec";
+  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTOqqLuCZHQIjWsFE68wHXP3KutCdXdxF604htjhsbRJskTupJs8zEMkMCBXRrT8vV/exec";
   document.getElementById("date").valueAsDate = new Date();
-  document.getElementById("spellingForm").addEventListener("submit", async function(e) {
+  document.getElementById("spellingForm").addEventListener("submit", function(e) {
     e.preventDefault();
-    const nickname  = document.getElementById("nickname").value.trim();
-    const studentId = document.getElementById("studentId").value.trim();
-    const date      = document.getElementById("date").value;
-    const section   = document.getElementById("section").value;
-    const errEl     = document.getElementById("errorMsg");
+    var nickname  = document.getElementById("nickname").value.trim();
+    var studentId = document.getElementById("studentId").value.trim();
+    var date      = document.getElementById("date").value;
+    var section   = document.getElementById("section").value;
+    var errEl     = document.getElementById("errorMsg");
     errEl.style.display = "none";
     if (!nickname || !studentId || !date || !section) {
-      errEl.textContent = "Please fill in all fields: Nickname, Student ID, Date, and Section.";
+      errEl.textContent   = "Please fill in all fields: Nickname, Student ID, Date, and Section.";
       errEl.style.display = "block";
       return;
     }
-    const answers = [];
-    for (let i = 1; i <= 10; i++) answers.push(document.getElementById("a" + i).value.trim());
-    const key = ANSWER_KEYS[section] || [];
-    let score = 0;
-    const results = answers.map((ans, i) => {
-      const isCorrect = ans.toLowerCase() === (key[i] || "").toLowerCase();
-      if (isCorrect) score++;
-      return { isCorrect, correct: key[i] || "" };
-    });
-    const btn = document.getElementById("submitBtn");
-    btn.disabled = true;
-    btn.textContent = "Submitted ✓";
-    for (let i = 0; i < 10; i++) {
-      const inp = document.getElementById("a" + (i + 1));
-      const icon = document.getElementById("c" + (i + 1));
-      inp.disabled = true;
-      icon.style.display = "inline";
-      icon.textContent = results[i].isCorrect ? "✅" : "❌";
+    var key = ANSWER_KEYS[section];
+    if (!key || key.length === 0) {
+      errEl.textContent   = "No answer key for section " + section + ". Please contact your teacher.";
+      errEl.style.display = "block";
+      return;
     }
-    const emojis = ["📖 Keep practicing!","📖 Keep practicing!","📖 Keep practicing!","📖 Keep practicing!","📖 Keep practicing!","👍 Good effort!","👍 Good effort!","👍 Good effort!","🎉 Great job!","🎉 Great job!","🌟 Perfect!"];
-    document.getElementById("scoreNum").textContent = score + " / 10";
+    var answers = [];
+    for (var i = 1; i <= 10; i++) {
+      answers.push(document.getElementById("a" + i).value.trim());
+    }
+    var score = 0;
+    var results = answers.map(function(ans, idx) {
+      var ok = ans.toLowerCase() === (key[idx] || "").toLowerCase();
+      if (ok) score++;
+      return { isCorrect: ok, correct: key[idx] || "" };
+    });
+    var btn = document.getElementById("submitBtn");
+    btn.disabled    = true;
+    btn.textContent = "Submitted";
+    for (var j = 0; j < 10; j++) {
+      var inp  = document.getElementById("a" + (j + 1));
+      var icon = document.getElementById("c" + (j + 1));
+      inp.disabled       = true;
+      icon.style.display = "inline";
+      icon.textContent   = results[j].isCorrect ? "OK" : "X";
+    }
+    var emojis = ["Keep practicing!","Keep practicing!","Keep practicing!","Keep practicing!","Keep practicing!","Good effort!","Good effort!","Good effort!","Great job!","Great job!","Perfect!"];
+    document.getElementById("scoreNum").textContent   = score + " / 10";
     document.getElementById("scoreLabel").textContent = emojis[score];
     document.getElementById("scoreCard").style.display = "block";
-    const keyGrid = document.getElementById("keyGrid");
+    var keyGrid = document.getElementById("keyGrid");
     keyGrid.innerHTML = "";
-    results.forEach((r, i) => {
-      const div = document.createElement("div");
+    for (var k = 0; k < results.length; k++) {
+      var r   = results[k];
+      var div = document.createElement("div");
       div.className = "key-row " + (r.isCorrect ? "correct" : "incorrect");
-      const yours = (!r.isCorrect && answers[i]) ? `<span class="key-yours">You wrote: ${answers[i]}</span>` : "";
-      div.innerHTML = `<span class="key-num">${i + 1}.</span><span><span class="key-word">${r.correct}</span>${yours}</span>`;
+      var yours = (!r.isCorrect && answers[k]) ? '<span class="key-yours">You wrote: ' + answers[k] + '</span>' : "";
+      div.innerHTML = '<span class="key-num">' + (k + 1) + '.</span><span><span class="key-word">' + r.correct + '</span>' + yours + '</span>';
       keyGrid.appendChild(div);
-    });
+    }
     document.getElementById("answerKeySection").style.display = "block";
-        // Send score to Google Sheet via GET (no CORS issues)
-    if (SCRIPT_URL !== "PASTE_YOUR_APPS_SCRIPT_URL_HERE") {
-      const params = new URLSearchParams({
-        action: "saveScore", studentId, nickname, section, date, score: String(score)
-      });
-      new Image().src = SCRIPT_URL + "?" + params.toString();
-    }
-    }
+    var params = "action=saveScore&studentId=" + encodeURIComponent(studentId) + "&nickname=" + encodeURIComponent(nickname) + "&section=" + encodeURIComponent(section) + "&date=" + encodeURIComponent(date) + "&score=" + encodeURIComponent(String(score));
+    new Image().src = SCRIPT_URL + "?" + params;
   });
 </script>
 </body>
-</html>
+        </html>
