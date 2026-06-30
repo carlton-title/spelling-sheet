@@ -46,6 +46,7 @@
     .key-row.incorrect .key-word { color: #c62828; }
     .key-yours { font-size: 0.76rem; color: #999; display: block; }
     .msg { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; text-align: center; }
+    .msg.info  { background: #e8f4fd; color: #1565c0; }
     .msg.error { background: #fdecea; color: #c62828; }
     .footer { margin-top: 22px; text-align: center; font-size: 0.78rem; color: #bbb; }
     @media (max-width: 460px) { .sheet { padding: 24px 18px 28px; } .answers-grid { grid-template-columns: 1fr; } .key-grid { flex-direction: column; } }
@@ -82,6 +83,7 @@
         </select>
       </div>
     </div>
+    <div class="msg info" id="loadingMsg" style="display:none">Loading this week&#39;s words&#8230;</div>
     <hr class="divider" />
     <div class="answers-title">Spelling Answers</div>
     <div class="answers-grid">
@@ -115,45 +117,88 @@
 </div>
 
 <script>
-  var ANSWER_KEYS = {
+  // ── Apps Script URL ───────────────────────────────────────────
+  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTOqqLuCZHQIjWsFE68wHXP3KutCdXdxF604htjhsbRJskTupJs8zEMkMCBXRrT8vV/exec";
+
+  // ── Fallback keys (used only if Google Sheets fetch fails) ────
+  // Teacher: update words in the "Spelling Keys" tab of Google Sheets.
+  // These fallback words are used only when the sheet cannot be reached.
+  var FALLBACK_KEYS = {
     "M4/10": ["Congenial","Friendship","Camaraderie","Teammate","Buddy","Associate","Companion","Acquaintance","Peer","Colleague"],
     "M4/11": ["Platform","Model","Database","Encryption","Transfer","Code","Algorithm","Cybersecurity","Software","Layer"],
     "M4/12": ["Camouflage","Habitat","Ecosystem","Prey","Herbivore","Adaptation","Offspring","Predator","Carnivore","Species"],
     "M4/13": ["Ancestor","Cousin","Matrimony","Relative","Daughter-In-Law","Genealogy","Prodigy","Inheritance","Nephew","Family"]
   };
-  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTOqqLuCZHQIjWsFE68wHXP3KutCdXdxF604htjhsbRJskTupJs8zEMkMCBXRrT8vV/exec";
+  // ─────────────────────────────────────────────────────────────
+
+  var fetchedKeys = {};   // cache of keys loaded from Google Sheets
 
   document.getElementById("date").valueAsDate = new Date();
 
+  // When student selects a section, fetch this week's words from Google Sheets
+  document.getElementById("section").addEventListener("change", function() {
+    var section = this.value;
+    if (!section || fetchedKeys[section]) return;   // already cached
+
+    document.getElementById("loadingMsg").style.display = "block";
+
+    // Pass the section number only (avoids slash-encoding issues in the URL)
+    var sectionNum = section.replace("M4/", "");    // "10", "11", etc.
+    var url = SCRIPT_URL + "?action=getKeys&section=" + encodeURIComponent(sectionNum);
+
+    fetch(url)
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.words && data.words.length > 0) {
+          fetchedKeys[section] = data.words;
+        }
+      })
+      .catch(function(err) {
+        console.warn("Key fetch failed, will use fallback:", err);
+      })
+      .finally(function() {
+        document.getElementById("loadingMsg").style.display = "none";
+      });
+  });
+
   document.getElementById("spellingForm").addEventListener("submit", function(e) {
     e.preventDefault();
+
     var nickname  = document.getElementById("nickname").value.trim();
     var studentId = document.getElementById("studentId").value.trim();
     var date      = document.getElementById("date").value;
     var section   = document.getElementById("section").value;
     var errEl     = document.getElementById("errorMsg");
     errEl.style.display = "none";
+
     if (!nickname || !studentId || !date || !section) {
       errEl.textContent   = "Please fill in all fields: Nickname, Student ID, Date, and Section.";
       errEl.style.display = "block";
       return;
     }
-    var key = ANSWER_KEYS[section];
+
+    // Use Google Sheets keys if available, otherwise use fallback
+    var key = fetchedKeys[section] || FALLBACK_KEYS[section];
     if (!key || key.length === 0) {
       errEl.textContent   = "No answer key for section " + section + ". Please contact your teacher.";
       errEl.style.display = "block";
       return;
     }
+
     var answers = [];
     for (var i = 1; i <= 10; i++) {
       answers.push(document.getElementById("a" + i).value.trim());
     }
+
+    // Grade -- case-insensitive
     var score = 0;
     var results = answers.map(function(ans, idx) {
       var ok = ans.toLowerCase() === (key[idx] || "").toLowerCase();
       if (ok) score++;
       return { isCorrect: ok, correct: key[idx] || "" };
     });
+
+    // Disable form + show icons
     var btn = document.getElementById("submitBtn");
     btn.disabled    = true;
     btn.textContent = "Submitted";
@@ -164,6 +209,8 @@
       icon.style.display = "inline";
       icon.textContent   = results[j].isCorrect ? "✅" : "❌";
     }
+
+    // Score card
     var emojis = [
       "📚 Keep practicing!","📚 Keep practicing!","📚 Keep practicing!",
       "📚 Keep practicing!","📚 Keep practicing!",
@@ -173,6 +220,8 @@
     document.getElementById("scoreNum").textContent   = score + " / 10";
     document.getElementById("scoreLabel").textContent = emojis[score];
     document.getElementById("scoreCard").style.display = "block";
+
+    // Answer key grid -- 1-5 top-to-bottom left, 6-10 top-to-bottom right
     var keyGrid = document.getElementById("keyGrid");
     keyGrid.innerHTML = "";
     var leftCol  = document.createElement("div");
@@ -185,13 +234,15 @@
       div.className = "key-row " + (r.isCorrect ? "correct" : "incorrect");
       var yours = (!r.isCorrect && answers[k])
         ? '<span class="key-yours">You wrote: ' + answers[k] + '</span>' : "";
-      div.innerHTML = '<span class="key-num">' + (k + 1) + '.</span>'
-        + '<span><span class="key-word">' + r.correct + '</span>' + yours + '</span>';
+      div.innerHTML = '<span class="key-num">' + (k + 1) + '.<\/span>'
+        + '<span><span class="key-word">' + r.correct + '<\/span>' + yours + '<\/span>';
       if (k < 5) { leftCol.appendChild(div); } else { rightCol.appendChild(div); }
     }
     keyGrid.appendChild(leftCol);
     keyGrid.appendChild(rightCol);
     document.getElementById("answerKeySection").style.display = "block";
+
+    // Send score to Google Sheet via GET (no CORS issues)
     var params = "action=saveScore"
       + "&studentId=" + encodeURIComponent(studentId)
       + "&nickname="  + encodeURIComponent(nickname)
@@ -202,4 +253,4 @@
   });
 </script>
 </body>
-                                                                     </html>
+                                                                                                                                                                                                     </html>
